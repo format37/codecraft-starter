@@ -1,0 +1,15 @@
+# build outputs of the official clients
+__pycache__/
+*.pyc
+target/
+bin/
+obj/
+node_modules/
+.dub/
+*.class
+*.o
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+aicup2020
