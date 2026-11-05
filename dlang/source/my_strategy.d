@@ -130,8 +130,8 @@ class MyStrategy
                             break;
                         }
                     }
-                    if (build.isNull)                                  // gather: attack the resources in sight
-                        attack = AttackAction(Nullable!int.init, nullable(AutoAttack(p.sightRange, [EntityType.Resource])));
+                    if (build.isNull)                                  // gather: the nearest resource, however far
+                        attack = AttackAction(Nullable!int.init, nullable(AutoAttack(size, [EntityType.Resource])));
                 }
             }
             else if (p.canMove)                                            // a fighting unit

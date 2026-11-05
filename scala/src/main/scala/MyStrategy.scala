@@ -87,8 +87,8 @@ class MyStrategy {
               resources -= props(t).initialCost
               wanted -= t
             }
-            if (build.isEmpty)                                         // gather: attack the resources in sight
-              attack = Some(AttackAction(None, Some(AutoAttack(p.sightRange, Seq(EntityType.RESOURCE)))))
+            if (build.isEmpty)                                         // gather: the nearest resource, however far
+              attack = Some(AttackAction(None, Some(AutoAttack(size, Seq(EntityType.RESOURCE)))))
         }
       } else if (p.canMove) {                                          // a fighting unit
         move = Some(nearest(enemies, e.position) match {

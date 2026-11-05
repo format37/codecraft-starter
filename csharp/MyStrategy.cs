@@ -122,8 +122,8 @@ namespace Aicup2020
                                 break;
                             }
                         }
-                        if (!build.HasValue)                                          // gather: attack the resources in sight
-                            attack = new AttackAction(null, new AutoAttack(p.SightRange, new[] { EntityType.Resource }));
+                        if (!build.HasValue)                                          // gather: the nearest resource, however far
+                            attack = new AttackAction(null, new AutoAttack(size, new[] { EntityType.Resource }));
                     }
                 }
                 else if (p.CanMove)                                                   // a fighting unit

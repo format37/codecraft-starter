@@ -187,11 +187,11 @@ impl MyStrategy {
                         });
                     }
                     if build_action.is_none() {
-                        // gather: attack the resources in sight
+                        // gather: the nearest resource, however far
                         attack_action = Some(AttackAction {
                             target: None,
                             auto_attack: Some(AutoAttack {
-                                pathfind_range: p.sight_range,
+                                pathfind_range: size,
                                 valid_targets: vec![EntityType::Resource],
                             }),
                         });

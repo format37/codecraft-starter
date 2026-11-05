@@ -152,8 +152,8 @@ public class MyStrategy {
                             break;
                         }
                     }
-                    if (build == null) {                                       // gather: attack the resources in sight
-                        attack = new AttackAction(null, new AutoAttack(p.getSightRange(), RESOURCES_ONLY));
+                    if (build == null) {                                       // gather: the nearest resource, however far
+                        attack = new AttackAction(null, new AutoAttack(size, RESOURCES_ONLY));
                     }
                 }
             } else if (p.isCanMove()) {                                        // a fighting unit

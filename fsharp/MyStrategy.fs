@@ -114,8 +114,8 @@ type MyStrategy() =
                             resources <- resources - props.[t].InitialCost
                             wanted.RemoveAt(i)
                         | _ -> i <- i + 1
-                    if Option.isNone build then                            // gather: attack the resources in sight
-                        attack <- Some (autoAttack p.SightRange [| EntityType.Resource |])
+                    if Option.isNone build then                            // gather: the nearest resource, however far
+                        attack <- Some (autoAttack size [| EntityType.Resource |])
             elif p.CanMove then                                            // a fighting unit
                 move <-
                     match nearest enemies e.Position with

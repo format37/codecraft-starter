@@ -63,8 +63,8 @@ class MyStrategy
             wanted.delete(t)
             break
           end
-          # gather: attack the resources in sight
-          attack = AttackAction.new(nil, AutoAttack.new(p.sight_range, [EntityType::RESOURCE])) if build.nil?
+          # gather: the nearest resource, however far
+          attack = AttackAction.new(nil, AutoAttack.new(@size, [EntityType::RESOURCE])) if build.nil?
         end
       elsif p.can_move                                               # a fighting unit
         enemy = nearest(enemies, e.position)

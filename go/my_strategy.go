@@ -188,9 +188,9 @@ func (strategy MyStrategy) getAction(playerView PlayerView, debugInterface *Debu
 						break
 					}
 				}
-				if action.BuildAction == nil { // gather: attack the resources in sight
+				if action.BuildAction == nil { // gather: the nearest resource, however far
 					action.AttackAction = &AttackAction{AutoAttack: &AutoAttack{
-						PathfindRange: p.SightRange, ValidTargets: []EntityType{EntityTypeResource},
+						PathfindRange: size, ValidTargets: []EntityType{EntityTypeResource},
 					}}
 				}
 			}

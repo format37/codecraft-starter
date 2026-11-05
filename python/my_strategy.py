@@ -87,8 +87,8 @@ class MyStrategy:
                             resources -= props[t].initial_cost
                             wanted.remove(t)
                             break
-                    if build is None:                                  # gather: attack the resources in sight
-                        attack = AttackAction(None, AutoAttack(p.sight_range, [EntityType.RESOURCE]))
+                    if build is None:                                  # gather: the nearest resource, however far
+                        attack = AttackAction(None, AutoAttack(size, [EntityType.RESOURCE]))
             elif p.can_move:                                           # a fighting unit
                 enemy = nearest(enemies, e.position)
                 if len(fighters) >= ARMY_SIZE and enemy is not None:   # the army is big enough: hunt

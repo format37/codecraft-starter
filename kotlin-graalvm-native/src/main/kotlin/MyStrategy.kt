@@ -91,8 +91,8 @@ class MyStrategy {
                                 break
                             }
                         }
-                        if (build == null)                                 // gather: attack the resources in sight
-                            attack = AttackAction(null, AutoAttack(p.sightRange, arrayOf(EntityType.RESOURCE)))
+                        if (build == null)                                 // gather: the nearest resource, however far
+                            attack = AttackAction(null, AutoAttack(size, arrayOf(EntityType.RESOURCE)))
                     }
                 }
                 p.canMove -> {                                             // a fighting unit

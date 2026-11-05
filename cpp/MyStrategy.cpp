@@ -177,8 +177,8 @@ Action MyStrategy::getAction(const PlayerView& playerView, DebugInterface* debug
                         break;
                     }
                 }
-                if (build == nullptr) {                                     // gather: attack the resources in sight
-                    attack = autoAttack(p, {RESOURCE});
+                if (build == nullptr) {                                     // gather: the nearest resource, however far
+                    attack = std::make_shared<AttackAction>(nullptr, std::make_shared<AutoAttack>(size, std::vector<EntityType>{RESOURCE}));
                 }
             }
         } else if (p.canMove) {                                             // a fighting unit
