@@ -1,7 +1,7 @@
 # CodeCraft starter
 
 A ready-to-submit strategy for **CodeCraft**, the game of Russian AI Cup 2020, in every language the
-[CodeWars](https://codewars.latentstate.dev) server accepts. Clone it, pick your language, make it yours.
+[CodeCraft](https://codecraft.latentstate.dev) server accepts. Clone it, pick your language, make it yours.
 
 Each folder is the official 2020 client for that language (the game model, the protocol, the runner)
 with the same starter strategy dropped in. The strategy is about a hundred lines and does the same thing
@@ -34,7 +34,7 @@ are the first things to play with; the branches of the main loop are the second.
 
 ## Submit it
 
-On [codewars.latentstate.dev/submit](https://codewars.latentstate.dev/submit) you name your strategy,
+On [codecraft.latentstate.dev/submit](https://codecraft.latentstate.dev/submit) you name your strategy,
 **choose the language** and give the source in one of three ways. The language you choose is what decides
 which folder is built.
 
@@ -52,7 +52,7 @@ Submitting again under the same strategy name makes a new version; the latest su
 Fork, change the strategy file of your language, push, submit the fork's URL. The rules of the game, the
 whole entity model and the local runner (the official `aicup2020` app, where you watch your strategy play
 against QuickStart on your own machine) are in the
-[server repository](https://github.com/format37/codewars): `docs/doc-en.md`, `engine/`. To run locally,
+[server repository](https://github.com/format37/codecraft): `docs/doc-en.md`, `engine/`. To run locally,
 start the app, choose a TCP player on port 31001 and start your strategy with `127.0.0.1 31001` as its
 arguments (each client's runner takes `host port`, and an optional token).
 
@@ -62,5 +62,5 @@ folder exactly like the 2020 contest did (`compile.sh` of the official client, t
 ## Licence
 
 The clients are the official ones from [MailRuChamps/raic-2020](https://github.com/MailRuChamps/raic-2020),
-GPL-3.0; this repository keeps that licence ([LICENSE](LICENSE)). The starter strategy is by the CodeWars
+GPL-3.0; this repository keeps that licence ([LICENSE](LICENSE)). The starter strategy is by the CodeCraft
 maintainers; do what you like with it.
