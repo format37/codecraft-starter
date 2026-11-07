@@ -1,131 +1,78 @@
-# A starter strategy for CodeCraft (Russian AI Cup 2020): builders gather resources, repair the base
-# and put up houses (and the bases that Round 2 starts without) as the population fills up; the bases
-# train units, builders first; the army gathers at home until it is big enough, then hunts the nearest
-# enemy, shooting whatever comes into range. Rules: https://github.com/format37/codecraft/blob/master/docs/doc-en.md.
-# Make it yours.
-
-require 'set'
 require_relative 'model'
 
 class MyStrategy
-  BASES_WANTED = [EntityType::BUILDER_BASE, EntityType::RANGED_BASE].freeze
-  FIRST_BUILDERS = 5        # the builder base spends first until it has this many; then the fighting bases do
-  MAX_BUILDERS = 12
-  ARMY_SIZE = 8             # fighting units wait at home until there are this many of them
-  REPAIR_RANGE = 6          # a builder this close to a damaged or unfinished building goes to repair it
+  # One MyStrategy plays the whole game: anything you keep in instance variables survives from tick to tick.
+
+  def log(text)
+    if @debug
+      @debug.send(DebugCommand::Add.new(DebugData::Log.new(text)))
+    end
+  end
+
+  def draw_rectangle(x0, y0, x1, y1, color = Color.new(1, 0, 0, 1))
+    return unless @debug
+    corners = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+    vertices = []
+    4.times do |i|  # LINES takes vertices in pairs: one pair per side
+      [corners[i], corners[(i + 1) % 4]].each do |x, y|
+        vertices << ColoredVertex.new(Vec2Float.new(x, y), Vec2Float.new(0, 0), color)
+      end
+    end
+    @debug.send(DebugCommand::Add.new(DebugData::Primitives.new(vertices, PrimitiveType::LINES)))
+  end
 
   def get_action(player_view, debug_interface)
+    @debug = debug_interface  # nil on the server and in batch mode: there is no viewer to draw in
     me = player_view.my_id
-    @size = player_view.map_size
-    @props = player_view.entity_properties
-    mine = player_view.entities.select { |e| e.player_id == me }
-    enemies = player_view.entities.select { |e| e.player_id && e.player_id != me }
+    house_props = player_view.entity_properties[EntityType::HOUSE]
     resources = player_view.players.find { |p| p.id == me }.resource
+    mine = player_view.entities.select { |e| e.player_id == me }
+    builders = mine.select { |e| e.entity_type == EntityType::BUILDER_UNIT }
+    base = mine.find { |e| e.entity_type == EntityType::BUILDER_BASE }
+    house = mine.find { |e| e.entity_type == EntityType::HOUSE }
 
-    count = mine.each_with_object(Hash.new(0)) { |e, h| h[e.entity_type] += 1 }
-    # population: active buildings provide it, every unit uses it (the engine refuses a unit beyond it)
-    provided = mine.select(&:active).sum { |e| @props[e.entity_type].population_provide }
-    used = mine.sum { |e| @props[e.entity_type].population_use }
-
-    @occupied = Set.new
-    player_view.entities.each do |e|
-      s = @props[e.entity_type].size
-      s.times { |dx| s.times { |dy| @occupied << [e.position.x + dx, e.position.y + dy] } }
+    count = {}
+    mine.each do |e|
+      count[e.entity_type] = count.fetch(e.entity_type, 0) + 1
+    end
+    count.each do |entity_type, n|
+      log("#{EntityType.constants.find { |c| EntityType.const_get(c) == entity_type }}: #{n}")
+    end
+    if house
+      log("house health: #{house.health}/#{house_props.max_health}")
     end
 
-    # what the builders should put up next: a missing base, then a house when the population is nearly full
-    wanted = BASES_WANTED.select { |t| count[t].zero? }
-    house_pending = mine.any? { |e| e.entity_type == EntityType::HOUSE && !e.active }
-    wanted << EntityType::HOUSE if used + 3 > provided && !house_pending
-    damaged = mine.select { |e| !@props[e.entity_type].can_move && e.health < @props[e.entity_type].max_health }
-    fighters = mine.select { |e| @props[e.entity_type].can_move && e.entity_type != EntityType::BUILDER_UNIT }
-    home = mine.find { |e| !@props[e.entity_type].can_move }&.position || Vec2Int.new(@size / 2, @size / 2)
+    # One house, right of the builder base (which is 5x5)
+    house_spot = nil
+    if house.nil? && base && resources >= house_props.initial_cost
+      house_spot = Vec2Int.new(base.position.x + 5, base.position.y + 4)
+      draw_rectangle(house_spot.x, house_spot.y,
+                     house_spot.x + house_props.size, house_spot.y + house_props.size)
+    end
 
-    # who spends first: the builder base while builders are few, the fighting bases (and houses) after that
-    builder_bases, others = mine.partition { |e| e.entity_type == EntityType::BUILDER_BASE }
-    order = count[EntityType::BUILDER_UNIT] < FIRST_BUILDERS ? builder_bases + others : others + builder_bases
-
-    actions = {}
-    order.each do |e|
-      p = @props[e.entity_type]
-      move = build = attack = repair = nil
-      if e.entity_type == EntityType::BUILDER_UNIT
-        target = nearest(damaged, e.position)
-        if target && distance(target.position, e.position) <= REPAIR_RANGE
-          move = MoveAction.new(target.position, true, false)        # a repair needs an adjacent builder
-          repair = RepairAction.new(target.id)
-        else
-          wanted.each do |t|
-            spot = spot_next_to(e, @props[t].size)
-            next unless spot && resources >= @props[t].initial_cost
-            build = BuildAction.new(t, spot)
-            resources -= @props[t].initial_cost
-            wanted.delete(t)
-            break
-          end
-          # gather: the nearest resource, however far
-          attack = AttackAction.new(nil, AutoAttack.new(@size, [EntityType::RESOURCE])) if build.nil?
-        end
-      elsif p.can_move                                               # a fighting unit
-        enemy = nearest(enemies, e.position)
-        if fighters.size >= ARMY_SIZE && enemy                       # the army is big enough: hunt
-          move = MoveAction.new(enemy.position, true, true)
-        else                                                         # otherwise guard the base
-          move = MoveAction.new(home, true, false)
-        end
-        attack = AttackAction.new(nil, AutoAttack.new(p.sight_range, []))
-      elsif p.build && e.active                                      # a base: train its unit
-        unit = p.build.options[0]
-        cost = @props[unit].initial_cost + count[unit]               # a unit costs more the more you have
-        spot = spot_next_to(e, 1)
-        enough = unit == EntityType::BUILDER_UNIT && count[unit] >= MAX_BUILDERS
-        if spot && !enough && resources >= cost && used + @props[unit].population_use <= provided
-          build = BuildAction.new(unit, spot)
-          resources -= cost
-          used += @props[unit].population_use
-          count[unit] += 1
-        end
-      else                                                           # a turret shoots; houses and walls just stand
-        attack = AttackAction.new(nil, AutoAttack.new(p.sight_range, []))
+    # Of the actions given to an entity, the first one possible this tick is done, in the order
+    # attack, build, repair, move. So "build (or repair), else move" walks a builder to the house
+    # and starts the job as soon as it is next to it.
+    result = Action.new({})
+    builders.each do |builder|
+      if house_spot
+        build = BuildAction.new(EntityType::HOUSE, house_spot)
+        result.entity_actions[builder.id] = EntityAction.new(
+          MoveAction.new(house_spot, true, false), build, nil, nil)
+      elsif house && house.health < house_props.max_health
+        # A new house starts with little health and works only once repaired to full
+        result.entity_actions[builder.id] = EntityAction.new(
+          MoveAction.new(house.position, true, false), nil, nil, RepairAction.new(house.id))
+      else
+        # Thoughtless mining: step right. A move into an adjacent cell with a resource mines it.
+        step = Vec2Int.new(builder.position.x + 1, builder.position.y)
+        result.entity_actions[builder.id] = EntityAction.new(MoveAction.new(step, true, false), nil, nil, nil)
       end
-      actions[e.id] = EntityAction.new(move, build, attack, repair)
     end
-    Action.new(actions)
+    result
   end
 
   def debug_update(player_view, debug_interface)
-    debug_interface.send(DebugCommand::Clear.new())
-    debug_interface.get_state()
-  end
-
-  private
-
-  # Can an entity of size `s` be placed with its lower-left corner at (x, y)?
-  def free?(x, y, s)
-    (0...s).all? do |dx|
-      (0...s).all? do |dy|
-        cx, cy = x + dx, y + dy
-        cx.between?(0, @size - 1) && cy.between?(0, @size - 1) && !@occupied.include?([cx, cy])
-      end
-    end
-  end
-
-  # A free place for a new entity of size `s` touching `entity` (right, top, left, bottom).
-  def spot_next_to(entity, s)
-    x, y, es = entity.position.x, entity.position.y, @props[entity.entity_type].size
-    es.times do |k|
-      [[x + es, y + k], [x + k, y + es], [x - s, y + k], [x + k, y - s]].each do |cx, cy|
-        return Vec2Int.new(cx, cy) if free?(cx, cy, s)
-      end
-    end
-    nil
-  end
-
-  def distance(a, b)
-    (a.x - b.x).abs + (a.y - b.y).abs
-  end
-
-  def nearest(entities, position)
-    entities.min_by { |e| distance(e.position, position) }
+    # main.rb calls this while the viewer waits between ticks; drawings sent here show on every tick
   end
 end

@@ -4,18 +4,17 @@ A ready-to-submit strategy for **CodeCraft**, the game of Russian AI Cup 2020, i
 [CodeCraft](https://codecraft.latentstate.dev) server accepts. Clone it, pick your language, make it yours.
 
 Each folder is the official 2020 client for that language (the game model, the protocol, the runner)
-with the same starter strategy dropped in. The strategy is about a hundred lines and does the same thing
-everywhere:
+with the same starter strategy dropped in. The strategy is deliberately small (about seventy lines of Python)
+and does the same thing everywhere:
 
-- builders gather resources, repair damaged or unfinished buildings next to them, put up houses when the
-  population is nearly full and build the bases that Round 2 starts without;
-- the bases train units: builders first, then the fighting bases spend first;
-- fighting units wait at home until there are eight of them, then hunt the nearest enemy, shooting whatever
-  comes into range.
+- builders step to the right, mining the resources in their way;
+- with enough resources and no house yet, they put up one house just right of the builder base, then repair it
+  until it is finished;
+- in the local runner it draws the planned house on the map and logs how many entities of each type you have
+  and the house's health; on the server, where there is no viewer, it skips the drawing and the logs.
 
-It beats the engine's built-in QuickStart bot in Round 1 and Round 2, and loses to anything that thinks. The
-constants at the top of the strategy file (`FIRST_BUILDERS`, `MAX_BUILDERS`, `ARMY_SIZE`, `REPAIR_RANGE`)
-are the first things to play with; the branches of the main loop are the second.
+That is all: the bases train nobody and nothing fights, so it loses to the built-in QuickStart bot. The rest of
+the game (training units, gathering, building, fighting) is yours to add.
 
 | Language on the submit page | Folder | Strategy file |
 |---|---|---|
@@ -49,12 +48,20 @@ Submitting again under the same strategy name makes a new version; the latest su
 
 ## Make it yours
 
-Fork, change the strategy file of your language, push, submit the fork's URL. The rules of the game, the
-whole entity model and the local runner (the official `aicup2020` app, where you watch your strategy play
-against QuickStart on your own machine) are in the
-[server repository](https://github.com/format37/codecraft): `docs/doc-en.md`, `engine/`. To run locally,
-start the app, choose a TCP player on port 31001 and start your strategy with `127.0.0.1 31001` as its
-arguments (each client's runner takes `host port`, and an optional token).
+Fork, change the strategy file of your language, push, submit the fork's URL. The rules of the game and the
+whole entity model are in the [server repository](https://github.com/format37/codecraft): `docs/doc-en.md`.
+
+To test on your machine, use the local runner from the same repository. It plays the server's games (the same
+engine, rules and maps) live in the browser, with the debug interface the strategy draws and logs through:
+
+```bash
+git clone https://github.com/format37/codecraft && make -C codecraft/sim-cpp
+codecraft/sim-cpp/build/codecraft-sim-cpp     # pick the game and the seats in the browser
+```
+
+Then start your strategy: each client's runner takes `host port` (and an optional token) and connects to
+`127.0.0.1 31001` by default; in Python that is `python3 main.py`. The official `aicup2020` app (`engine/` of
+the server repository) works too.
 
 Only the strategy file is yours to edit: the rest of each folder is the client, and the server builds every
 folder exactly like the 2020 contest did (`compile.sh` of the official client, then `run.sh`).
