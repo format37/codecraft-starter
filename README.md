@@ -56,20 +56,20 @@ Fork, change the strategy file of your language, push, submit the fork's URL. Th
 whole entity model are on [codecraft.day/rules](https://codecraft.day/rules), and in the
 [server repository](https://github.com/format37/codecraft) as `docs/doc-en.md`.
 
-To test on your machine, use the local runner from the same repository. It plays the server's games (the same
-engine, rules and maps) live in the browser, with the debug interface the strategy draws and logs through:
+To test on your machine, use the local runner: the server's engine with the game live in the browser and the debug
+interface your strategy draws and logs through. The guide with the commands of every language is
+[codecraft.day/quickstart](https://codecraft.day/quickstart); in short, in this folder:
 
 ```bash
-git clone https://github.com/format37/codecraft && make -C codecraft/sim-cpp
-codecraft/sim-cpp/build/codecraft-sim-cpp     # pick the game and the seats in the browser
+docker run --rm -it -p 31000:31000 -p 31001-31004:31001-31004 -v "$PWD":/game ghcr.io/format37/codecraft-runner
+# or, without Docker (also linux-arm64 and macos):
+curl -L https://github.com/format37/codecraft/releases/latest/download/codecraft-runner-linux-x86_64.tar.gz | tar xz && ./codecraft-runner
 ```
 
 Then start your strategy: each client's runner takes `host port` (and an optional token) and connects to
-`127.0.0.1 31001` by default; in Python that is `python3 main.py`.
-
-Like the server, the runner cuts off a strategy that takes more than 1 s to answer a tick, or 40 s in all. To
-stop at breakpoints in a debugger, start it with `--limits warn` (or pick that in the viewer's side panel): it
-then waits as long as needed and only marks the ticks the server would not allow.
+`127.0.0.1 31001` by default; in Python that is `python3 main.py`. Like the server, the runner cuts off a strategy
+that takes more than 1 s to answer a tick, or 40 s in all; `--limits warn` (or the viewer's side panel) makes it
+wait for a breakpoint instead and only mark the ticks the server would not allow.
 
 Only the strategy file is yours to edit: the rest of each folder is the client, and the server builds every
 folder exactly like the 2020 contest did (`compile.sh` of the official client, then `run.sh`).
