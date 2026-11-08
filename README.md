@@ -13,8 +13,9 @@ and does the same thing everywhere:
 - in the local runner it draws the planned house on the map and logs how many entities of each type you have
   and the house's health; on the server, where there is no viewer, it skips the drawing and the logs.
 
-That is all: the bases train nobody and nothing fights, so it loses to the built-in QuickStart bot. The rest of
-the game (training units, gathering, building, fighting) is yours to add.
+That is all: the bases train nobody and nothing fights. The server's built-in QuickStart bot plays this same
+strategy, so a game against it is a mirror match until you change yours. The rest of the game (training units,
+gathering, building, fighting) is yours to add.
 
 | Language on the submit page | Folder | Strategy file |
 |---|---|---|
