@@ -64,6 +64,10 @@ Then start your strategy: each client's runner takes `host port` (and an optiona
 `127.0.0.1 31001` by default; in Python that is `python3 main.py`. The official `aicup2020` app (`engine/` of
 the server repository) works too.
 
+Like the server, the runner cuts off a strategy that takes more than 1 s to answer a tick, or 40 s in all. To
+stop at breakpoints in a debugger, start it with `--limits warn` (or pick that in the viewer's side panel): it
+then waits as long as needed and only marks the ticks the server would not allow.
+
 Only the strategy file is yours to edit: the rest of each folder is the client, and the server builds every
 folder exactly like the 2020 contest did (`compile.sh` of the official client, then `run.sh`).
 
