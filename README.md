@@ -45,12 +45,16 @@ which folder is built.
 3. **One file.** Upload just the strategy file (`my_strategy.py`, `MyStrategy.java`, ...); the server puts it
    into the official client of the chosen language.
 
-Submitting again under the same strategy name makes a new version; the latest successful build plays.
+Submitting again under the same strategy name makes a new version; the latest successful build plays. Each new
+version plays its rated games by itself; the [leaderboard](https://codecraft.day/leaderboard) shows where it
+stands. A coding agent (Claude Code, Codex, Cursor, any MCP client) can submit, play and read the games for you
+with a token from [codecraft.day/agents](https://codecraft.day/agents).
 
 ## Make it yours
 
 Fork, change the strategy file of your language, push, submit the fork's URL. The rules of the game and the
-whole entity model are in the [server repository](https://github.com/format37/codecraft): `docs/doc-en.md`.
+whole entity model are on [codecraft.day/rules](https://codecraft.day/rules), and in the
+[server repository](https://github.com/format37/codecraft) as `docs/doc-en.md`.
 
 To test on your machine, use the local runner from the same repository. It plays the server's games (the same
 engine, rules and maps) live in the browser, with the debug interface the strategy draws and logs through:
