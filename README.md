@@ -1,6 +1,6 @@
 # CodeCraft starter
 
-A ready-to-submit strategy for **CodeCraft**, the game of Russian AI Cup 2020, in every language the
+A ready-to-submit strategy for **CodeCraft**, the bot-programming game of 2020, in every language the
 [CodeCraft](https://codecraft.latentstate.dev) server accepts. Clone it, pick your language, make it yours.
 
 Each folder is the official 2020 client for that language (the game model, the protocol, the runner)
@@ -61,8 +61,7 @@ codecraft/sim-cpp/build/codecraft-sim-cpp     # pick the game and the seats in t
 ```
 
 Then start your strategy: each client's runner takes `host port` (and an optional token) and connects to
-`127.0.0.1 31001` by default; in Python that is `python3 main.py`. The official `aicup2020` app (`engine/` of
-the server repository) works too.
+`127.0.0.1 31001` by default; in Python that is `python3 main.py`.
 
 Like the server, the runner cuts off a strategy that takes more than 1 s to answer a tick, or 40 s in all. To
 stop at breakpoints in a debugger, start it with `--limits warn` (or pick that in the viewer's side panel): it
@@ -73,6 +72,6 @@ folder exactly like the 2020 contest did (`compile.sh` of the official client, t
 
 ## Licence
 
-The clients are the official ones from [MailRuChamps/raic-2020](https://github.com/MailRuChamps/raic-2020),
+The clients are the official ones from [the original repository](https://github.com/MailRuChamps/raic-2020),
 GPL-3.0; this repository keeps that licence ([LICENSE](LICENSE)). The starter strategy is by the CodeCraft
 maintainers; do what you like with it.
