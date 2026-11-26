@@ -76,12 +76,53 @@ tar xf runner.zip
 ```
 
 Then start your strategy: each client's runner takes `host port` (and an optional token) and connects to
-`127.0.0.1 31001` by default; in Python that is `python3 main.py` (`python main.py` on Windows). Like the server,
-the runner cuts off a strategy that takes more than 1 s to answer a tick, or 40 s in all; `--limits warn` (or the
-viewer's side panel) makes it wait for a breakpoint instead and only mark the ticks the server would not allow.
+`127.0.0.1 31001` by default; in Python that is `python3 main.py` (`python main.py` on Windows). The runner marks
+the ticks the server would not allow (more than 1 s to answer a tick, or 40 s in all) but waits for your strategy,
+so a breakpoint does no harm; `--limits server` (or the viewer's side panel) cuts it off as the server does.
 
 Only the strategy file is yours to edit: the rest of each folder is the client, and the server builds every
 folder exactly like the 2020 contest did (`compile.sh` of the official client, then `run.sh`).
+
+## Keep it fast
+
+The server gives a strategy 1 s to answer each tick and 40 s of CPU time for the whole game, and cuts it off past
+either. A strategy often slows down as the game goes on, so one that is quick at tick 100 can still run out of time
+at tick 800.
+
+**Which ticks are slow.** The viewer of the local runner charts what your strategy took to answer each tick against
+the 1 s limit, and the game pages on codecraft.day show the same chart for the server's games, with their
+`timing.json` to download. Without the viewer, the local runner's batch mode writes that file too. Put a `game.json`
+like this in the folder:
+
+```json
+{"seed": 7, "game": {"Create": "Round1"},
+ "players": [{"Tcp": {"host": "0.0.0.0", "port": 31001, "accept_timeout": null, "timeout": null, "token": null}},
+             "QuickStart", "QuickStart", "QuickStart"]}
+```
+
+```bash
+docker run --rm -p 31001:31001 -v "$PWD":/game ghcr.io/format37/codecraft-runner \
+  --config /game/game.json --batch-mode --save-timing /game/timing.json
+# or, without Docker: ./codecraft-runner --config game.json --batch-mode --save-timing timing.json
+```
+
+Then start your strategy as usual. In `timing.json`, `ms` holds one list per seat with the milliseconds of every
+tick from `first_tick` on (`null` for the built-in bots). `"Round2"` plays with fog of war; `"Finals"` is 1v1 and
+takes two players.
+
+**Where the time goes.** Profile the slow ticks with your language's profiler. In Python, `tools/profile_tick.py`
+does it without touching `main.py` or your strategy: run it instead of `main.py` (the same `host port` follow a
+`--`, as in `-- 127.0.0.1 31002`).
+
+```bash
+python3 tools/profile_tick.py --ticks 500         # one tick
+python3 tools/profile_tick.py --ticks 100 800     # an early and a late tick: what grows in their ncalls?
+python3 tools/profile_tick.py --ticks 400-409     # ten ticks in one profile
+```
+
+It prints the top functions of each profile, saves it as `profiles/tick_N.prof` (for `snakeviz` or `pstats`) and
+the time of every tick to `profiles/ticks.csv`. A profiled tick runs slower than usual. `tools/` is outside the
+language folders, so it is never part of a submission.
 
 ## Licence
 
